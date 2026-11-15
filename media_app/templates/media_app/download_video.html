@@ -1,0 +1,164 @@
+{% extends "media_app/base.html" %}
+{% block title %}Download from Link{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-primary fw-bold mb-4 text-center">
+        🎥 Download Video or Audio
+    </h2>
+
+    <!-- Download Form -->
+    <form id="download-form" class="mx-auto mb-4" style="max-width: 520px;">
+        {% csrf_token %}
+        <div class="mb-3">
+            <input type="url" name="link" id="link" class="form-control form-control-lg"
+                   placeholder="Paste YouTube or video link" required>
+        </div>
+
+        <div class="mb-3">
+            <select name="type" id="type" class="form-select form-select-lg" required>
+                <option value="video">🎬 Video (MP4)</option>
+                <option value="audio">🎧 Audio (MP3)</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <select name="quality" id="quality" class="form-select form-select-lg">
+                <option value="320">📱 320p (Small)</option>
+                <option value="720" selected>💻 720p (Balanced)</option>
+                <option value="1080">🖥 1080p (HD)</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100">⬇️ Download</button>
+    </form>
+
+    <!-- Progress -->
+    <div class="mt-4" id="progress-container" style="display:none;">
+        <div class="progress" style="height: 25px;">
+            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                 role="progressbar" style="width:0%">0%</div>
+        </div>
+        <p id="status-message" class="mt-2 text-center"></p>
+    </div>
+
+    <!-- Downloads List -->
+    <div class="mt-5">
+        <h4 class="fw-bold">Downloads</h4>
+        <ul id="downloads-list" class="list-group"></ul>
+    </div>
+</div>
+
+<script>
+const downloadsList = document.getElementById("downloads-list");
+
+// Encode filename for URL safely
+function encodeUrl(filename) {
+    return encodeURIComponent(filename).replace(/%2F/g, "/");
+}
+
+// Add a download entry to the list
+function addDownloadEntry(filename, isPlaylist) {
+    const li = document.createElement("li");
+    li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+
+    const link = document.createElement("a");
+    link.href = `{{ MEDIA_URL }}${encodeUrl(filename)}`;
+    link.download = filename;
+    link.innerText = isPlaylist ? `${filename} (Playlist ZIP)` : filename;
+    link.classList.add("me-3");
+
+    const status = document.createElement("span");
+    status.classList.add("badge", "bg-success", "rounded-pill");
+    status.innerText = "Completed";
+
+    li.appendChild(link);
+    li.appendChild(status);
+    downloadsList.prepend(li);
+}
+
+// Add a pending download entry
+function addPendingEntry(filename) {
+    const li = document.createElement("li");
+    li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+    li.innerHTML = `<span>${filename}</span><span class="badge bg-warning rounded-pill">Pending</span>`;
+    downloadsList.prepend(li);
+    return li;
+}
+
+// Update pending entry to completed
+function markCompleted(li, filename, isPlaylist) {
+    li.innerHTML = "";
+    const link = document.createElement("a");
+    link.href = `{{ MEDIA_URL }}${encodeUrl(filename)}`;
+    link.download = filename;
+    link.innerText = isPlaylist ? `${filename} (Playlist ZIP)` : filename;
+    link.classList.add("me-3");
+
+    const status = document.createElement("span");
+    status.classList.add("badge", "bg-success", "rounded-pill");
+    status.innerText = "Completed";
+
+    li.appendChild(link);
+    li.appendChild(status);
+}
+
+// Update pending entry to failed with retry button
+function markFailed(li, filename, type, quality) {
+    li.innerHTML = "";
+    const span = document.createElement("span");
+    span.innerText = filename;
+
+    const retryBtn = document.createElement("button");
+    retryBtn.classList.add("btn", "btn-sm", "btn-danger");
+    retryBtn.innerText = "Retry";
+    retryBtn.addEventListener("click", () => {
+        li.remove();
+        downloadFile(filename, type, quality);
+    });
+
+    li.appendChild(span);
+    li.appendChild(retryBtn);
+}
+
+// Handle the actual download request
+function downloadFile(link, type, quality) {
+    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+    const li = addPendingEntry(link);
+
+    fetch("{% url 'media_app:download_from_link' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": csrfToken
+        },
+        body: `link=${encodeURIComponent(link)}&type=${type}&quality=${quality}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            markCompleted(li, data.filename, data.is_playlist);
+        } else {
+            markFailed(li, link, type, quality);
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        markFailed(li, link, type, quality);
+        console.error(error);
+        alert("⚠️ An unexpected error occurred.");
+    });
+}
+
+// Handle form submission
+document.getElementById("download-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const link = document.getElementById("link").value;
+    const type = document.getElementById("type").value;
+    const quality = document.getElementById("quality").value;
+
+    downloadFile(link, type, quality);
+});
+</script>
+{% endblock %}

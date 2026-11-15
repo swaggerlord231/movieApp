@@ -1,0 +1,31 @@
+{% extends "media_app/base.html" %}
+{% block title %}Dashboard | Media Hub{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">Welcome, {{ user.username }}!</h2>
+
+    <div class="row">
+        <!-- Latest Series -->
+        {% for series in latest_series %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                {% if series.poster %}
+                <img src="{{ series.poster.url }}" class="card-img-top" alt="{{ series.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ series.title }}</h5>
+                    <p class="card-text">{{ series.description|truncatewords:15 }}</p>
+                    <a href="{% url 'media_app:series_detail' series.slug %}" class="btn btn-primary btn-sm">View Series</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No series available yet.</p>
+        {% endfor %}
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'media_app:signout' %}" class="btn btn-danger">Sign Out</a>
+    </div>
+</div>
+{% endblock %}

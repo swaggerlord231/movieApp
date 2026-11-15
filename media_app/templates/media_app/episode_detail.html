@@ -1,0 +1,128 @@
+{% extends "media_app/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container py-5">
+  <div class="row align-items-center g-4">
+
+    <!-- Episode Poster -->
+    <div class="col-lg-5 col-md-6 text-center">
+      {% if episode.poster %}
+        <div class="position-relative shadow-lg rounded-3 overflow-hidden">
+          <img src="{{ episode.poster.url }}" alt="{{ episode.title }}" class="img-fluid rounded-3">
+          <span class="badge bg-primary position-absolute top-0 start-0 m-3 px-3 py-2 fs-6 shadow">
+            📺 Episode
+          </span>
+        </div>
+      {% else %}
+        <div class="bg-light border rounded-3 d-flex align-items-center justify-content-center" style="height:350px;">
+          <span class="text-muted">No Poster Available</span>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Episode Info -->
+    <div class="col-lg-7 col-md-6">
+      <h1 class="fw-bold text-dark mb-3 text-capitalize">
+        {{ episode.title }}
+      </h1>
+      <p class="text-muted fs-5">
+        <strong>{{ episode.season.series.title }}</strong> — 
+        Season {{ episode.season.number }}, Episode {{ episode.episode_number }}
+      </p>
+
+      <p class="text-secondary text-capitalize">{{ episode.description }}</p>
+
+      <div class="d-flex flex-wrap gap-3 mt-4">
+        <div class="text-secondary">
+          <i class="fa-solid fa-calendar-day me-2 text-primary"></i>
+          Uploaded: <strong>{{ episode.upload_date|date:"M d, Y" }}</strong>
+        </div>
+        <div class="text-secondary">
+          <i class="fa-solid fa-download me-2 text-success"></i>
+          Downloads: <strong>{{ episode.download_count }}</strong>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        {% if episode.video_file %}
+          <a href="{% url 'media_app:episode_download' episode.season.series.slug episode.season.number episode.slug %}"
+            class="btn btn-success btn-lg rounded-pill px-4 shadow-sm">
+            <i class="fa-solid fa-cloud-arrow-down me-2"></i> Download Episode
+          </a>
+        {% else %}
+          <p class="text-muted">Download not available.</p>
+        {% endif %}
+      </div>
+       <!-- Copyright Notice -->
+      <div class="mt-4 p-3 bg-light border rounded">
+        <p class="mb-1 text-muted">
+          MediaHub does not claim ownership of any movie on this site.
+        </p>
+        <p class="mb-0 text-muted">
+          If your copyrighted material has been uploaded, or links to your copyrighted material have been uploaded, 
+          kindly <a href="" class="text-decoration-underline">click here</a> to file a take down notice.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trailer Section -->
+  <div class="row mt-5 g-4">
+    <!-- Left Column: Episode Trailer -->
+    {% if episode.trailer %}
+    <div class="col-lg-8 col-md-12">
+      <div class="card shadow-sm rounded-3 overflow-hidden">
+        <div class="card-header bg-danger text-white fw-bold">
+          <i class="fa-solid fa-film me-2"></i> Episode Trailer
+        </div>
+        <div class="ratio ratio-16x9">
+          <video controls class="w-100 h-100">
+            <source src="{{ episode.trailer.url }}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Right Column: Disclaimer, Advertisement & Support -->
+    <div class="col-lg-4 col-md-12">
+      <div class="card shadow-sm rounded-3 p-3">
+        <!-- Disclaimer Section -->
+        <h5 class="fw-bold text-warning mb-2">
+          <i class="fa-solid fa-circle-exclamation me-2"></i> Disclaimer
+        </h5>
+        <p class="text-muted small mb-4">
+          MediaHub does not claim ownership of any episode on this site.
+          If your copyrighted material has been uploaded, 
+          kindly <a href="" class="text-decoration-underline">file a take down notice</a>.
+        </p>
+
+        <!-- Advertisement Section -->
+        <h5 class="fw-bold text-primary mb-2">
+          <i class="fa-solid fa-bullhorn me-2"></i> Advertisement
+        </h5>
+        <div class="mb-4">
+          <!-- Example ad placeholder -->
+          <div class="bg-light border rounded p-3 text-center">
+            <p class="mb-0">Your ad can go here</p>
+          </div>
+        </div>
+
+        <!-- Support Section -->
+        <h5 class="fw-bold text-success mb-2">
+          <i class="fa-solid fa-hands-helping me-2"></i> Support
+        </h5>
+        <p class="text-muted small">
+          If you like our content, consider supporting us via 
+          <a href="" class="text-decoration-underline">donations</a> or sharing with friends.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Include Reviews -->
+{% include "media_app/review_section.html" %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "media_app/base.html" %}
+{% block title %}Music List | Media Hub{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h2>🎶 Music List</h2>
+  <ul class="list-group">
+    {% for music in music_files %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ music.title }} by {{ music.artist }}
+        <a href="{% url 'media_app:download_music' music.id %}" class="btn btn-success btn-sm">⬇️ Download</a>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No music uploaded yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

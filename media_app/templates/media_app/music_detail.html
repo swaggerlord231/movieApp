@@ -1,0 +1,82 @@
+{% extends "media_app/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container py-5">
+  <div class="row align-items-center g-4">
+
+    <!-- Music Poster -->
+    <div class="col-lg-5 col-md-6 text-center">
+      {% if music.poster %}
+        <div class="position-relative shadow-lg rounded-3 overflow-hidden">
+          <img src="{{ music.poster.url }}" alt="{{ music.title }}" class="img-fluid rounded-3">
+          <span class="badge bg-primary position-absolute top-0 start-0 m-3 px-3 py-2 fs-6 shadow">
+            🎵 {{ music.get_music_type_display }}
+          </span>
+        </div>
+      {% else %}
+        <div class="bg-light border rounded-3 d-flex align-items-center justify-content-center" style="height:350px;">
+          <span class="text-muted">No Poster Available</span>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Music Info -->
+    <div class="col-lg-7 col-md-6">
+      <h1 class="fw-bold text-dark mb-3 text-capitalize">{{ music.title }}</h1>
+      <p class="text-muted fs-5 text-capitalize">
+        Artist: {{ music.artist }}<br>
+        Genre: {{ music.genre|default:'N/A' }}<br>
+        Type: {{ music.get_music_type_display }}
+      </p>
+
+      <div class="d-flex flex-wrap gap-3 mt-4">
+        <div class="text-secondary">
+          <i class="fa-solid fa-calendar-day me-2 text-primary"></i>
+          Uploaded: <strong>{{ music.uploaded_at|date:"M d, Y" }}</strong>
+        </div>
+        <div class="text-secondary">
+          <i class="fa-solid fa-download me-2 text-success"></i>
+          Downloads: <strong>{{ music.download_count|default:0 }}</strong>
+          
+        </div>
+      </div>
+
+      <div class="mt-4">
+        {% if music.file %}
+          <a href="{% url 'media_app:download_music' music.id %}" 
+            class="btn btn-success btn-lg rounded-pill px-4 shadow-sm">
+            <i class="fa-solid fa-cloud-arrow-down me-2"></i> Download Music
+          </a>
+        {% else %}
+          <p class="text-muted">Download not available.</p>
+        {% endif %}
+      </div>
+
+      <!-- Optional Audio Player -->
+      {% comment %} {% if music.file %}
+      <div class="mt-4">
+        <audio controls class="w-100">
+          <source src="{{ music.file.url }}" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+      {% endif %} {% endcomment %}
+
+      <!-- Copyright Notice -->
+      <div class="mt-4 p-3 bg-light border rounded">
+        <p class="mb-1 text-muted">
+          MediaHub does not claim ownership of any music on this site.
+        </p>
+        <p class="mb-0 text-muted">
+          If your copyrighted material has been uploaded, 
+          kindly <a href="" class="text-decoration-underline">click here</a> to file a take down notice.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Optional Reviews Section -->
+  {% include "media_app/review_section.html" %}
+</div>
+{% endblock %}

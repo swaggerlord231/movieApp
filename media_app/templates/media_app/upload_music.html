@@ -1,0 +1,74 @@
+{% extends "media_app/base.html" %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow-lg p-4 rounded-4">
+    <h2 class="text-center mb-4">Upload Music</h2>
+
+    <form method="POST" enctype="multipart/form-data" class="row g-3" id="musicUploadForm">
+      {% csrf_token %}
+
+      <div class="col-md-6">
+        <label class="form-label">Title</label>
+        {{ form.title }}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Artist</label>
+        {{ form.artist }}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Genre</label>
+        {{ form.genre }}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Music Type</label>
+        {{ form.music_type }}
+      </div>
+
+      <div class="col-md-6" id="singleFileSection">
+        <label class="form-label">Audio File</label>
+        {{ form.file }}
+      </div>
+
+      <div class="col-md-6 d-none" id="multiFileSection">
+        <label class="form-label">Upload Multiple Tracks</label>
+        <input type="file" name="tracks" id="multiFileInput" class="form-control" multiple>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Poster Image</label>
+        {{ form.poster }}
+      </div>
+
+      <div class="col-12 text-center">
+        <button type="submit" class="btn btn-primary btn-lg px-5 mt-3">Upload</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const musicTypeSelect = document.getElementById('musicTypeSelect');
+  const singleSection = document.getElementById('singleFileSection');
+  const multiSection = document.getElementById('multiFileSection');
+
+  function toggleUploadType() {
+    const type = musicTypeSelect.value;
+    if (type === 'album' || type === 'ep') {
+      singleSection.classList.add('d-none');
+      multiSection.classList.remove('d-none');
+    } else {
+      singleSection.classList.remove('d-none');
+      multiSection.classList.add('d-none');
+    }
+  }
+
+  musicTypeSelect.addEventListener('change', toggleUploadType);
+  toggleUploadType(); // initialize on load
+});
+</script>
+{% endblock %}

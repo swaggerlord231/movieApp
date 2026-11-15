@@ -1,0 +1,25 @@
+# Secrets & local-only files
+.env
+cookies.txt
+
+# Database
+db.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*.log
+venv/
+env/
+
+# Large binaries & media (keep on disk, not in Git)
+ffmpeg-8.0-essentials_build/
+media/
+staticfiles/
+static/videos/*.mp4
+movie_app.zip
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store

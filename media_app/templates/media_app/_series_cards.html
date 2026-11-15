@@ -1,0 +1,46 @@
+{# media_app/_series_cards.html #}
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="series-container">
+    {% for s in series_list %}
+    <div class="col">
+        <div class="card h-100 shadow-sm rounded overflow-hidden movie-card hover-scale" style="transition: transform 0.3s;">
+            {% if s.poster %}
+                <div class="card-img-top overflow-hidden" style="height:200px;">
+                    <img src="{{ s.poster.url }}" class="w-100 h-100 object-fit-cover" alt="{{ s.title }}">
+                </div>
+            {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                    <span class="text-muted">No Poster Available</span>
+                </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-2">
+                    <a href="{% url 'media_app:series_detail' s.slug %}" class="text-decoration-none text-capitalize">
+                        {{ s.title }}
+                    </a>
+                </h5>
+                {% if s.description %}
+                    <p class="card-text text-truncate mb-2">{{ s.description|truncatewords:20 }}</p>
+                {% else %}
+                    <p class="card-text text-muted mb-2">No description available.</p>
+                {% endif %}
+                <ul class="list-unstyled d-flex flex-wrap gap-2 small text-secondary mt-auto mb-2">
+                    {% if s.release_date %}
+                        <li class="d-flex align-items-center">📅 {{ s.release_date|date:"M d, Y" }}</li>
+                    {% endif %}
+                    {% if s.rating %}
+                        <li class="d-flex align-items-center">⭐ {{ s.rating|floatformat:1 }}</li>
+                    {% endif %}
+                    {% if s.genres.all %}
+                        <li class="d-flex flex-row flex-wrap gap-1 align-items-center">
+                            {% for g in s.genres.all %}
+                                <span class="badge bg-dark">{{ g.name }}</span>
+                            {% endfor %}
+                        </li>
+                    {% endif %}
+                </ul>
+                <a href="{% url 'media_app:series_detail' s.slug %}" class="btn btn-primary btn-sm w-100 mt-auto">View Seasons</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>

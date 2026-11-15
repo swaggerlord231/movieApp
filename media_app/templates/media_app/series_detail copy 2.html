@@ -1,0 +1,119 @@
+{% extends "media_app/base.html" %}
+{% block title %}{{ series.title }} | Media Hub{% endblock %}
+{% block content %}
+
+<style>
+  .series-hero {
+    background: linear-gradient(to right, #0d6efd, #6610f2);
+    color: white;
+    padding: 60px 20px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+
+  .series-hero img {
+    border: 4px solid rgba(255,255,255,0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: transform 0.4s ease;
+  }
+
+  .series-hero img:hover {
+    transform: scale(1.05);
+  }
+
+  .season-card {
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: #fff;
+    border-radius: 15px;
+  }
+
+  .season-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+
+  .season-card .btn {
+    border-radius: 30px;
+  }
+
+  video {
+    border-radius: 10px;
+    margin-top: 15px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+  }
+
+  h4.section-title {
+    margin-top: 60px;
+    font-weight: bold;
+    color: #333;
+    position: relative;
+  }
+
+  h4.section-title::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(to right, #0d6efd, #6610f2);
+    border-radius: 2px;
+  }
+</style>
+<div class="container py-5">
+<!-- Hero Section -->
+<section class="series-hero text-center mb-5">
+  <div class="container">
+    <h2>{{ series.title }}</h2>
+{% if series.poster %}
+    <img src="{{ series.poster.url }}" alt="{{ series.title }}" width="300">
+{% endif %}
+<p>{{ series.description }}</p>
+
+{% for season in seasons %}
+    <h3>Season {{ season.number }}</h3>
+    <p>{{ season.description }}</p>
+    
+    <ul>
+    {% for episode in season.episodes.all %}
+        {% if episode.is_published %}
+            <li>
+                <strong>{{ episode.title }}</strong>
+                {% if episode.video_file %}
+                    - <a href="{{ episode.video_file.url }}" download>Download</a>
+                {% endif %}
+            </li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+{% endfor %}
+
+  </div>
+</section>
+
+<!-- Seasons -->
+<div class="container">
+  <h4 class="section-title mb-4">🎬 Available Seasons</h4>
+  <div class="row">
+    {% for season in seasons %}
+      <div class="col-md-4 mb-4">
+        <div class="card season-card h-100">
+          <div class="card-body text-center">
+            <h5 class="fw-bold text-primary">Season {{ season.number }}</h5>
+            <p class="text-muted text-capitalize">{{ season.description|truncatewords:20 }}</p>
+            <a href="{% url 'media_app:season_detail' series.slug season.number %}" class="btn btn-outline-primary btn-sm px-4">
+              <i class="fa-solid fa-tv me-1"></i> View Episodes
+            </a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="text-center text-muted py-5">
+        <p>No seasons added yet for this series.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+<div>
+{% endblock %}

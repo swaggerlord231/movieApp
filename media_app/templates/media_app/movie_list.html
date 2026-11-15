@@ -1,0 +1,118 @@
+{% extends "media_app/base.html" %}
+{% block content %}
+
+<style>
+.badge {
+    font-size: 0.55rem;
+    margin-right: 3px;
+}
+</style>
+
+<div class="container my-5">
+    <h1 class="text-center mb-4 display-6 fw-bold">🎬 Movies</h1>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+
+        {% for movie in movies %}
+        <div class="col movie-card-wrapper" style="display:none;">
+            <div class="card h-100 shadow-sm rounded overflow-hidden movie-card hover-scale" style="transition: transform 0.3s;">
+
+                {% if movie.poster %}
+                    <div class="card-img-top overflow-hidden" style="height: 200px;">
+                        <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="w-100 h-100 object-fit-cover">
+                    </div>
+                {% elif movie.poster_url %}
+                    <div class="card-img-top overflow-hidden" style="height: 200px;">
+                        <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="w-100 h-100 object-fit-cover">
+                    </div>
+                {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height:200px;">
+                        <span class="text-muted">No Poster Available</span>
+                    </div>
+                {% endif %}
+
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title text-capitalize mb-2">
+                        <a href="{{ movie.get_absolute_url }}" class="text-decoration-none">{{ movie.title }}</a>
+                    </h5>
+
+                    {% if movie.description %}
+                        <p class="card-text text-truncate mb-2">{{ movie.description|truncatewords:20 }}</p>
+                    {% else %}
+                        <p class="card-text text-muted mb-2">No description available.</p>
+                    {% endif %}
+
+                    <ul class="list-unstyled small text-secondary mt-auto mb-2">
+                        {% if movie.release_date %}
+                            <li>📅 {{ movie.release_date|date:"M d, Y" }}</li>
+                        {% endif %}
+
+                        {% if movie.rating %}
+                            <li>⭐ {{ movie.rating }}</li>
+                        {% endif %}
+
+                        <li>
+                            {% for g in movie.genres.all %}
+                                <a href="{% url 'media_app:search' %}?genre={{ g.name }}"
+                                   class="badge bg-dark text-decoration-none">
+                                   {{ g.name }}
+                                </a>
+                            {% empty %}
+                                <span class="text-muted">N/A</span>
+                            {% endfor %}
+                        </li>
+                    </ul>
+
+                    <a href="{{ movie.get_absolute_url }}" class="btn btn-primary btn-sm w-100 text-capitalize">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% empty %}
+        <div class="col-12 text-center">
+            <p class="text-muted">No movies uploaded yet. 🎬</p>
+        </div>
+
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-4">
+        <button id="view-more-service" class="btn btn-outline-primary rounded-pill px-4 py-2 shadow-sm">
+            View More <i class="bi bi-chevron-down ms-1"></i>
+        </button>
+    </div>
+
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const allCards = document.querySelectorAll('.movie-card-wrapper');
+    const btn = document.getElementById('view-more-service');
+
+    let visibleCount = 8;     // initial number of movies shown
+    const increment = 8;      // number of movies to show when clicking
+
+    function updateMovieVisibility() {
+        allCards.forEach((card, index) => {
+            card.style.display = index < visibleCount ? 'block' : 'none';
+        });
+
+        // hide the button when all movies are visible
+        if (visibleCount >= allCards.length) {
+            btn.style.display = 'none';
+        }
+    }
+
+    // Initial render
+    updateMovieVisibility();
+
+    btn.addEventListener('click', () => {
+        visibleCount += increment;
+        updateMovieVisibility();
+    });
+});
+</script>
+
+
+{% endblock %}

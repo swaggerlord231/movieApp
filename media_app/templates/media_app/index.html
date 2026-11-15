@@ -1,0 +1,538 @@
+{% extends "media_app/base.html" %}
+{% load static %}
+{% block title %} Welcome to MediaHub!{% endblock %}
+
+{% block content %}
+<div class="video-container text-center my-4">
+    {% if video.poster %}
+        <video width="100%" height="auto" controls poster="{{ video.poster.url }}">
+    {% else %}
+        <video width="100%" height="auto" controls>
+    {% endif %}
+        {% if video.video_mp4 %}
+            <source src="{{ video.video_mp4.url }}" type="video/mp4">
+        {% endif %}
+        {% if video.video_webm %}
+            <source src="{{ video.video_webm.url }}" type="video/webm">
+        {% endif %}
+        Your browser does not support the video tag.
+    </video>
+
+    {% if video.description %}
+        <p class="mt-3">{{ video.description }}</p>
+    {% endif %}
+</div>
+
+
+
+<section class="season-hero bg-warning text-dark py-5 mt-5 mb-5">
+    <div class="position-relative overflow-hidden" style="height: 70vh; border-radius: 1rem;">
+
+        <!-- Background Video with Fallback Poster -->
+        <video id="heroVideo" autoplay muted loop playsinline 
+               class="position-absolute w-100 h-100 top-0 start-0 object-fit-cover" 
+               style="z-index: -1;" poster="{% static 'images/video-poster.jpg' %}">
+            <source src="{% static 'videos/wicked.mp4' %}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <!-- Overlay Content -->
+        <div class="container h-100 d-flex flex-column justify-content-center align-items-center text-center px-3">
+            <div class="bg-dark bg-opacity-50 p-4 rounded-3 shadow-lg animate__animated animate__fadeInDown">
+                <h1 class="fw-bold mb-3 display-5">🎬 Welcome to MediaHub!</h1>
+                <p class="lead mb-3">
+                    Explore movies, series, and music — all in one place.  
+                    Stream, download, and enjoy your favorite content anytime, anywhere.
+                </p>
+                <p class="small mb-0">
+                    ⚠️ <strong>Beware of fake sites!</strong> We never ask for money or personal info.  
+                    Official site: <strong>MediaHub.com</strong>
+                </p>
+                <a href="{% url 'media_app:movie_list' %}" class="btn btn-primary btn-lg mt-3 shadow-sm">
+                    Browse Movies
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS: Handle Autoplay Policy -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('heroVideo');
+            if (video) {
+                video.muted = true; // Ensure muted for autoplay
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.warn('Autoplay blocked, trying again...');
+                        video.muted = true;
+                        video.play().catch(() => console.error('Video playback failed.'));
+                    });
+                }
+            }
+        });
+    </script>
+</section>
+
+
+    <!-- Ads Section -->
+    <section class="ads-section mt-5 mb-5">
+      <div class="row mt-5 g-4">
+          <!-- Left Column: Movie Trailer -->
+          
+          <div class="col-lg-8 col-md-12">
+            <div class="card shadow-sm rounded-3 overflow-hidden">
+              <div class="card-header bg-danger text-white fw-bold">
+                <i class="fa-solid fa-film me-2"></i> Be here(Ads)
+              </div>
+              <div class="ratio ratio-16x9">
+                <video controls class="w-100 h-100">
+                  <source src="{{ movie.trailer.url }}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+          </div>
+        
+
+          <!-- Right Column: Disclaimer, Advertisement & Support -->
+          <div class="col-lg-4 col-md-12">
+            <div class="card shadow-sm rounded-3 p-3">
+              
+              <!-- Ads Section Header -->
+              <h5 class="fw-bold text-primary mb-3">
+                <i class="fa-solid fa-bullhorn me-2"></i> Advertisements
+              </h5>
+
+              {% for ad in ads %}
+              <div class="card mb-3 shadow-sm rounded-3 overflow-hidden">
+                {% if ad.is_video %}
+                <!-- Video Ad -->
+                <div class="ratio ratio-16x9">
+                  <video controls class="w-100 h-100">
+                    <source src="{{ ad.media_file.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+                {% elif ad.is_image %}
+                <!-- Image Ad -->
+                <img src="{{ ad.media_file.url }}" class="card-img-top" alt="{{ ad.title }}">
+                {% endif %}
+
+                <div class="card-body p-3">
+                  <h6 class="fw-bold">{{ ad.title }}</h6>
+                  <p class="text-muted small mb-1">{{ ad.description|truncatechars:80 }}</p>
+                  {% if ad.owner_name %}
+                  <p class="text-muted small mb-1"><strong>Owner:</strong> {{ ad.owner_name }}</p>
+                  {% endif %}
+                  {% if ad.owner_email %}
+                  <p class="text-muted small mb-1"><strong>Email:</strong> {{ ad.owner_email }}</p>
+                  {% endif %}
+                  {% if ad.owner_phone %}
+                  <p class="text-muted small mb-1"><strong>Phone:</strong> {{ ad.owner_phone }}</p>
+                  {% endif %}
+                  <p class="text-muted small mb-0"><strong>Posted by admin:</strong> {{ ad.posted_by_admin.username }}</p>
+                </div>
+              </div>
+              {% empty %}
+              <p class="text-muted small">No advertisements available at the moment.</p>
+              {% endfor %}
+              
+            </div>
+          </div>
+
+      </div>
+</section>
+
+    {% comment %} <!-- Ads Section -->
+      <div class="row mt-5 g-4">
+          <!-- Left Column: Movie Trailer -->
+          
+          <div class="col-lg-8 col-md-12">
+            <div class="card shadow-sm rounded-3 overflow-hidden">
+              <div class="card-header bg-danger text-white fw-bold">
+                <i class="fa-solid fa-film me-2"></i> Be here(Ads)
+              </div>
+              <div class="ratio ratio-16x9">
+                <video controls class="w-100 h-100">
+                  <source src="{{ movie.trailer.url }}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+          </div>
+        
+
+          <!-- Right Column: Disclaimer, Advertisement & Support -->
+          <div class="col-lg-4 col-md-12">
+            <div class="card shadow-sm rounded-3 p-3">
+              <!-- Disclaimer Section -->
+              <h5 class="fw-bold text-warning mb-2">
+                <i class="fa-solid fa-circle-exclamation me-2"></i> Disclaimer
+              </h5>
+              <p class="text-muted small mb-4">
+                MediaHub does not claim ownership of any movie on this site.
+                If your copyrighted material has been uploaded, 
+                kindly <a href="" class="text-decoration-underline">file a take down notice</a>.
+              </p>
+
+              <!-- Advertisement Section -->
+              <h5 class="fw-bold text-primary mb-2">
+                <i class="fa-solid fa-bullhorn me-2"></i> Advertisement
+              </h5>
+              <div class="mb-4">
+                <!-- Example ad placeholder -->
+                <div class="bg-light border rounded p-3 text-center">
+                  <p class="mb-0">Your ad can go here</p>
+                </div>
+              </div>
+
+              <!-- Support Section -->
+              <h5 class="fw-bold text-success mb-2">
+                <i class="fa-solid fa-hands-helping me-2"></i> Support
+              </h5>
+              <p class="text-muted small">
+                If you like our content, consider supporting us via 
+                <a href="" class="text-decoration-underline">donations</a> or sharing with friends.
+              </p>
+            </div>
+          </div>
+      </div>
+    {% endcomment %}
+
+
+   <!-- Music Section -->
+  <section class="music-section mt-5 mb-5">
+    <div class="row mt-5 g-4">
+      <h2 class="mb-3">🎵 Latest Music</h2>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for music in music_files %}
+        <div class="music-card card h-100 shadow-sm d-flex flex-wrap align-items-center p-2" style="max-width: 48%; height: 250px;">
+          <div class="card h-100 shadow-sm">
+            {% if music.poster %}
+              <img src="{{ music.poster.url }}" class="card-img-top" alt="{{ music.title }}">
+            {% else %}
+              <img src="{% static 'img/12.jpg' %}" class="card-img-top" alt="{{ music.title }}">
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title text-capitalize">{{ music.title }}</h5>
+              <p class="card-text text-truncate">
+                Artist: {{ music.artist }} <br>
+                Genre: {{ music.genre|default:'N/A' }} <br>
+                Type: {{ music.get_music_type_display }}
+              </p>
+              <div class="mt-auto">
+                  <a href="{% url 'media_app:music_detail' music.slug %}" class="btn btn-success btn-sm w-100 text-capitalize">
+                    ⬇️ Music detail
+                  </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+          <p class="text-center">No music uploaded yet.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Movies Section -->
+<section class="movie-section mt-5 mb-5">
+  <div class="container">
+    <h2 class="mb-4 text-center display-6 fw-bold">🎬 Latest Movies</h2>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+
+      {% for movie in movies %}
+      <div class="col movie-card-wrapper" style="display:none; opacity:0; transition:opacity .5s;">
+        <div class="card h-100 shadow-sm movie-card hover-scale">
+
+          <!-- Poster -->
+          {% if movie.poster %}
+          <div class="card-img-top overflow-hidden" style="height: 200px;">
+            <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="w-100 h-100 object-fit-cover">
+          </div>
+          {% else %}
+          <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+            <span class="text-muted">No Poster Available</span>
+          </div>
+          {% endif %}
+
+          <!-- Card Body -->
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-2">
+              <a href="{{ movie.get_absolute_url }}" class="text-decoration-none text-capitalize">
+                {{ movie.title }}
+              </a>
+            </h5>
+
+            <p class="card-text text-truncate mb-3">
+              {{ movie.description|truncatewords:25 }}
+            </p>
+
+            <ul class="list-unstyled small text-secondary mt-auto mb-2">
+
+              {% if movie.release_date %}
+              <li>📅 {{ movie.release_date|date:"M d, Y" }}</li>
+              {% endif %}
+
+              {% if movie.rating %}
+              <li>⭐ {{ movie.rating }}</li>
+              {% endif %}
+
+              {% if movie.genres.all %}
+              <li>
+                {% for g in movie.genres.all %}
+                <span class="badge bg-dark">{{ g.name }}</span>
+                {% empty %}
+                <span class="text-muted">N/A</span>
+                {% endfor %}
+              </li>
+              {% endif %}
+
+            </ul>
+
+            <a href="{{ movie.get_absolute_url }}" class="btn btn-primary btn-sm mt-auto w-100 text-capitalize">
+              ⬇️ Review
+            </a>
+          </div>
+
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <p class="text-center text-muted">No movies yet.</p>
+      </div>
+      {% endfor %}
+
+    </div>
+
+    <!-- Load More Button -->
+    <div class="text-center mt-4">
+      <button id="movie-load-more" class="btn btn-outline-primary px-4 py-2">
+        Load More Movies 🎬
+      </button>
+    </div>
+
+  </div>
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const movieCards = document.querySelectorAll(".movie-card-wrapper");
+    const movieBtn = document.getElementById("movie-load-more");
+
+    let movieVisible = 8;  
+    const increment = 8;
+
+    function showMovies() {
+        movieCards.forEach((card, index) => {
+            if (index < movieVisible) {
+                card.style.display = "block";
+                setTimeout(() => (card.style.opacity = "1"), 50);
+            }
+        });
+
+        if (movieVisible >= movieCards.length) {
+            movieBtn.style.display = "none";
+        }
+    }
+
+    showMovies();
+
+    movieBtn.addEventListener("click", () => {
+        movieVisible += increment;
+        showMovies();
+    });
+
+});
+</script>
+
+</section>
+
+  <style>
+      /* Hover effect */
+      .movie-card.hover-scale:hover {
+          transform: scale(1.05);
+          box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.15);
+          transition: transform 0.3s ease-in-out;
+      }
+
+      /* Image fit */
+      .object-fit-cover {
+          object-fit: cover;
+      }
+
+      /* Text truncate */
+      .text-truncate {
+          display: -webkit-box;
+          -webkit-line-clamp: 3; /* limit to 3 lines */
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+      }
+  </style>
+
+     <!-- Google Ads Section -->
+    <section class="google-ads-section mt-5 mb-5">
+      <div class="container">
+        <h2 class="fw-bold mb-4 text-center text-primary">
+          <i class="fa-solid fa-bullhorn me-2"></i> Sponsored Ads
+        </h2>
+
+        <div class="row g-4 justify-content-center">
+          <!-- Example: 2 Ads side by side on large screens -->
+          <div class="col-lg-6 col-md-12">
+            <div class="card shadow-sm rounded-3 p-3 text-center">
+              <!-- Google Ad Slot -->
+              <ins class="adsbygoogle"
+                  style="display:block"
+                  data-ad-client="ca-pub-XXXXXXXXXXXXXXX"
+                  data-ad-slot="YYYYYYYYYY"
+                  data-ad-format="auto"
+                  data-full-width-responsive="true"></ins>
+              <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+              </script>
+              <p class="text-muted small mt-2">Sponsored</p>
+            </div>
+          </div>
+
+          <div class="col-lg-6 col-md-12">
+            <div class="card shadow-sm rounded-3 p-3 text-center">
+              <!-- Google Ad Slot -->
+              <ins class="adsbygoogle"
+                  style="display:block"
+                  data-ad-client="ca-pub-XXXXXXXXXXXXXXX"
+                  data-ad-slot="ZZZZZZZZZZ"
+                  data-ad-format="auto"
+                  data-full-width-responsive="true"></ins>
+              <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+              </script>
+              <p class="text-muted small mt-2">Sponsored</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+<!-- Series Section -->
+<section class="series-section mt-5 mb-5">
+  <div class="container">
+    <h2 class="mb-4 text-center display-6 fw-bold">📺 TV Series</h2>
+
+    <div id="series-grid" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+      {% for s in series_list %}
+      <div class="col series-card-wrapper" style="display:none; opacity:0; transition:opacity .6s;">
+        <div class="card h-100 shadow-sm series-card hover-scale">
+          
+          {% if s.poster %}
+          <div class="card-img-top overflow-hidden" style="height: 200px;">
+            <img src="{{ s.poster.url }}" alt="{{ s.title }}" class="w-100 h-100 object-fit-cover">
+          </div>
+          {% else %}
+          <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+            <span class="text-muted">No Poster Available</span>
+          </div>
+          {% endif %}
+
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-2 text-capitalize">{{ s.title }}</h5>
+            <p class="text-muted small text-truncate mb-3">{{ s.description|truncatewords:15 }}</p>
+
+            <ul class="list-unstyled d-flex flex-wrap gap-2 small text-secondary mt-auto mb-2">
+              {% if s.release_date %}
+              <li>📅 {{ s.release_date|date:"M d, Y" }}</li>
+              {% endif %}
+
+              {% if s.rating %}
+              <li>⭐ {{ s.rating|floatformat:1 }}</li>
+              {% endif %}
+
+              <li>
+                {% for g in s.genres.all %}
+                <span class="badge bg-dark">{{ g.name }}</span>
+                {% empty %}
+                <span class="text-muted small">N/A</span>
+                {% endfor %}
+              </li>
+            </ul>
+
+            <a href="{% url 'media_app:series_detail' s.slug %}" class="btn btn-primary btn-sm mt-auto w-100 text-capitalize">
+              View Seasons
+            </a>
+          </div>
+
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center">
+        <p class="text-muted">No series available.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Load More Button -->
+    <div class="text-center mt-4">
+      <button id="load-more-btn" class="btn btn-outline-primary rounded-pill px-4 py-2 shadow-sm">
+        Load More <i class="bi bi-chevron-down ms-1"></i>
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<style>
+.series-card.hover-scale:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.15);
+    transition: transform 0.3s ease-in-out;
+}
+
+.object-fit-cover { object-fit: cover; }
+
+.text-truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+      const cards = document.querySelectorAll(".series-card-wrapper");
+      const btn = document.getElementById("load-more-btn");
+
+      let visibleCount = 8;  // initial number
+      const increment = 8;   // load more count
+
+      function revealCards() {
+          cards.forEach((card, index) => {
+              if (index < visibleCount) {
+                  card.style.display = "block";
+                  setTimeout(() => card.style.opacity = "1", 50);
+              }
+          });
+
+          if (visibleCount >= cards.length) {
+              btn.style.display = "none";
+          }
+      }
+
+      revealCards(); // initial
+
+      btn.addEventListener("click", () => {
+          visibleCount += increment;
+          revealCards();
+      });
+
+  });
+</script>
+
+
+
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "media_app/base.html" %}
+{% load static %}
+{% block title %}{{ series.title }} — Season {{ season.number }} | Media Hub{% endblock %}
+{% block content %}
+
+<style>
+  /* Hero Section */
+  .season-hero {
+    background: linear-gradient(135deg, #0d6efd, #6f42c1);
+    color: #fff;
+    border-radius: 20px;
+    padding: 60px 20px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    margin-bottom: 50px;
+  }
+
+  .season-hero h2 {
+    font-weight: 700;
+    font-size: 2.25rem;
+    margin-bottom: 10px;
+  }
+
+  .season-hero p {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.9);
+  }
+
+  /* Episode Cards */
+  .episode-card {
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .episode-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  }
+
+  .episode-card img {
+    height: 220px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .episode-card:hover img {
+    transform: scale(1.05);
+  }
+
+  .episode-card h5 {
+    color: #0d6efd;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .episode-card .btn {
+    border-radius: 50px;
+    font-weight: 500;
+    margin-top: auto;
+  }
+
+  .no-episodes {
+    text-align: center;
+    color: #777;
+    padding: 50px 0;
+  }
+
+  .section-title {
+    font-weight: 700;
+    margin-bottom: 30px;
+    position: relative;
+    font-size: 1.5rem;
+  }
+
+  .section-title::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 70px;
+    height: 4px;
+    background: linear-gradient(90deg, #0d6efd, #6610f2);
+    border-radius: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .season-hero {
+      padding: 40px 15px;
+    }
+
+    .season-hero h2 {
+      font-size: 1.75rem;
+    }
+
+    .episode-card img {
+      height: 180px;
+    }
+  }
+</style>
+<div class="container py-5">
+  <!-- Hero Section -->
+  {% comment %} <section class="season-hero">
+    <div class="container">
+      <h2>{{ series.title }} — Season {{ season.number }}</h2>
+      {% if season.title %}
+        <h2 class="text-capitalize text-black"> {{ season.title }}</h2>  
+      {% endif %}
+      {% if season.description %}
+        <p class="lead mb-0">{{ season.description }}</p>
+      {% endif %}
+    </div>
+  </section> {% endcomment %}
+
+  <!-- Episodes Section -->
+  <div class="container">
+    <h4 class="section-title">📺 Episodes</h4>
+    <div class="row g-2">
+      {% for ep in episodes %}
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2"> <!-- responsive width -->
+          <div class="episode-card d-flex flex-column" style="font-size: 0.7rem; max-height:200px; overflow:hidden;">
+            
+            {% if ep.poster %}
+              <img src="{{ ep.poster.url }}" class="w-100" alt="{{ ep.title }}" style="height:80px; object-fit:cover;">
+            {% else %}
+              <div class="bg-light d-flex align-items-center justify-content-center" style="height:80px;">
+                <span class="text-muted">No Poster</span>
+              </div>
+            {% endif %}
+
+            <div class="p-1 text-center d-flex flex-column flex-grow-1">
+              <h6 style="margin-bottom:1px; font-size:0.7rem;">Ep {{ ep.episode_number }}: {{ ep.title }}</h6>
+              <p class="text-muted small mb-1" style="font-size:0.6rem;">{{ ep.description|truncatewords:7 }}</p>
+              
+              {% if ep.rating %}
+                <p class="mb-1" style="font-size:0.6rem;"><strong>Rating:</strong> {{ ep.rating }}/10</p>
+              {% endif %}
+
+              <a href="{% url 'media_app:episode_detail' series.slug season.number ep.slug %}" 
+                class="btn btn-outline-primary btn-sm px-1 mx-auto" style="font-size:0.6rem;">
+                <i class="fa-solid fa-play me-1"></i> View
+              </a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12 text-center">
+          <p>No episodes have been added yet for this season.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
