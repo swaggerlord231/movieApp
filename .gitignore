@@ -2,8 +2,7 @@
 .env
 cookies.txt
 
-# Database
-db.sqlite3
+# Database: db.sqlite3 IS committed (seed data for the Vercel demo)
 
 # Python
 __pycache__/
@@ -14,10 +13,14 @@ env/
 
 # Large binaries & media (keep on disk, not in Git)
 ffmpeg-8.0-essentials_build/
-media/
 staticfiles/
-static/videos/*.mp4
 movie_app.zip
+
+# Media: keep posters + trailer clips (small), skip big uploads/downloads
+media/*
+!media/posters/
+!media/videos/
+static/videos/movie_bg.mp4
 
 # Editor / OS
 .vscode/

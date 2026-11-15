@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+import shutil
+import tempfile
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,10 +79,34 @@ WSGI_APPLICATION = 'movie_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+def _sqlite_database_path():
+    """Return a writable path for the SQLite database.
+
+    On serverless hosts (e.g. Vercel) the project directory is read-only and
+    the bundle is wiped between deployments, so we copy the committed
+    db.sqlite3 into the writable temp directory (/tmp) on cold start.
+    Local development keeps using the project file directly.
+    """
+    bundled = BASE_DIR / 'db.sqlite3'
+    running_on_serverless = bool(os.environ.get('VERCEL')) or not os.access(
+        BASE_DIR, os.W_OK
+    )
+    if running_on_serverless:
+        tmp_db = Path(tempfile.gettempdir()) / 'db.sqlite3'
+        try:
+            if bundled.exists() and not tmp_db.exists():
+                shutil.copyfile(bundled, tmp_db)
+            if tmp_db.exists():
+                return tmp_db
+        except OSError:
+            pass  # fall back to the bundled path
+    return bundled
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': _sqlite_database_path(),
     }
 }
 
@@ -125,7 +152,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"  # for production (collectstatic)
 
 # Enable gzip compression and caching for production
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# (kept out: whitenoise is not installed; Django 5.2 ignores this legacy setting)
 
 
 # media
